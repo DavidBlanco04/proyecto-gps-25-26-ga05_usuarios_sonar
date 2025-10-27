@@ -269,6 +269,35 @@ paths:
       summary: Obtener detalles de una lista de reproduccion
       tags:
       - Listas de Reproduccion
+    patch:
+      parameters:
+      - explode: false
+        in: path
+        name: idLista
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListaUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lista"
+          description: Lista modificada correctamente
+        "404":
+          description: Lista no encontrada
+        "400":
+          description: Datos inválidos
+      summary: Modificar una lista de reproducción
+      tags:
+      - Listas de Reproduccion
   /listas/{idLista}/canciones/{idCancion}:
     delete:
       parameters:
@@ -881,6 +910,35 @@ paths:
       summary: Obtener detalles de un post
       tags:
       - Posts de Comunidad
+    patch:
+      parameters:
+      - explode: false
+        in: path
+        name: idPost
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+          description: Post modificado correctamente
+        "404":
+          description: Post no encontrado
+        "400":
+          description: Datos inválidos
+      summary: Modificar un post
+      tags:
+      - Posts de Comunidad
   /posts/{idPost}/respuestas:
     get:
       parameters:
@@ -1005,7 +1063,6 @@ components:
     UsuarioUpdate:
       example:
         descripcion: descripcion
-        tipo: 0
         correo: correo
         direccion: direccion
         contrasena: contrasena
@@ -1031,8 +1088,6 @@ components:
         urlImagen:
           format: uri
           type: string
-        tipo:
-          type: integer
       type: object
     Lista:
       example:
@@ -1076,6 +1131,9 @@ components:
       - nombre
       type: object
     ListaUpdate:
+      example:
+        nombre: nombre
+        urlImagen: https://openapi-generator.tech
       properties:
         nombre:
           type: string
@@ -1125,23 +1183,21 @@ components:
           example: 49.99
           format: float
           type: number
+      required:
+      - cantidad
+      - idMerch
+      - idUsuario
       type: object
     CompraCreate:
       example:
         cantidad: 2
-        precioTotal: 49.99
       properties:
         cantidad:
           example: 2
           minimum: 1
           type: integer
-        precioTotal:
-          example: 49.99
-          format: float
-          type: number
       required:
       - cantidad
-      - precioTotal
       type: object
     Post:
       example:
@@ -1203,10 +1259,14 @@ components:
       - idUsuario
       type: object
     PostUpdate:
+      example:
+        comentario: ¡Increible concierto de anoche! (editado)
       properties:
         comentario:
           example: ¡Increible concierto de anoche! (editado)
           type: string
+      required:
+      - comentario
       type: object
     Error:
       example:
@@ -1221,7 +1281,7 @@ components:
           type: string
       required:
       - codigo
-      - mensajerepro
+      - mensaje
       type: object
     _usuarios__idUsuario__favoritos_canciones_get_200_response_inner:
       example:

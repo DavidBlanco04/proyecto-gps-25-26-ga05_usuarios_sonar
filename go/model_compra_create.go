@@ -12,6 +12,4 @@ package openapi
 type CompraCreate struct {
 
 	Cantidad int32 `json:"cantidad"`
-
-	PrecioTotal float32 `json:"precioTotal"`
 }

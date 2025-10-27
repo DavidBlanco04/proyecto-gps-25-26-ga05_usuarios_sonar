@@ -44,6 +44,13 @@ func (api *ListasDeReproduccionAPI) ListasIdListaGet(c *gin.Context) {
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
+// Patch /listas/:idLista
+// Modificar una lista de reproducción 
+func (api *ListasDeReproduccionAPI) ListasIdListaPatch(c *gin.Context) {
+	// Your handler implementation
+	c.JSON(200, gin.H{"status": "OK"})
+}
+
 // Get /usuarios/:idUsuario/listas
 // Obtener todas las listas de reproduccion de un usuario 
 func (api *ListasDeReproduccionAPI) UsuariosIdUsuarioListasGet(c *gin.Context) {

@@ -24,6 +24,4 @@ type UsuarioUpdate struct {
 	Descripcion string `json:"descripcion,omitempty"`
 
 	UrlImagen string `json:"urlImagen,omitempty"`
-
-	Tipo int32 `json:"tipo,omitempty"`
 }
