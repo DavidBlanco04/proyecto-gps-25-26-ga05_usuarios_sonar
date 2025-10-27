@@ -187,6 +187,12 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			handleFunctions.ListasDeReproduccionAPI.ListasIdListaGet,
 		},
 		{
+			"ListasIdListaPatch",
+			http.MethodPatch,
+			"/listas/:idLista",
+			handleFunctions.ListasDeReproduccionAPI.ListasIdListaPatch,
+		},
+		{
 			"UsuariosIdUsuarioListasGet",
 			http.MethodGet,
 			"/usuarios/:idUsuario/listas",
@@ -221,6 +227,12 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			http.MethodGet,
 			"/posts/:idPost",
 			handleFunctions.PostsDeComunidadAPI.PostsIdPostGet,
+		},
+		{
+			"PostsIdPostPatch",
+			http.MethodPatch,
+			"/posts/:idPost",
+			handleFunctions.PostsDeComunidadAPI.PostsIdPostPatch,
 		},
 		{
 			"PostsIdPostRespuestasGet",

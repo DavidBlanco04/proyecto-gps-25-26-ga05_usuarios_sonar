@@ -44,6 +44,13 @@ func (api *PostsDeComunidadAPI) PostsIdPostGet(c *gin.Context) {
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
+// Patch /posts/:idPost
+// Modificar un post 
+func (api *PostsDeComunidadAPI) PostsIdPostPatch(c *gin.Context) {
+	// Your handler implementation
+	c.JSON(200, gin.H{"status": "OK"})
+}
+
 // Get /posts/:idPost/respuestas
 // Obtener respuestas a un post 
 func (api *PostsDeComunidadAPI) PostsIdPostRespuestasGet(c *gin.Context) {

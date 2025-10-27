@@ -15,13 +15,13 @@ import (
 
 type Compra struct {
 
-	IdUsuario int32 `json:"idUsuario,omitempty"`
+	IdUsuario int32 `json:"idUsuario"`
 
-	IdMerch int32 `json:"idMerch,omitempty"`
+	IdMerch int32 `json:"idMerch"`
 
 	FechaCompra time.Time `json:"fechaCompra,omitempty"`
 
-	Cantidad int32 `json:"cantidad,omitempty"`
+	Cantidad int32 `json:"cantidad"`
 
 	PrecioTotal float32 `json:"precioTotal,omitempty"`
 }

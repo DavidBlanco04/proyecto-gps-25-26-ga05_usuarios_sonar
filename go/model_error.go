@@ -13,5 +13,5 @@ type Error struct {
 
 	Codigo int32 `json:"codigo"`
 
-	Mensaje string `json:"mensaje,omitempty"`
+	Mensaje string `json:"mensaje"`
 }

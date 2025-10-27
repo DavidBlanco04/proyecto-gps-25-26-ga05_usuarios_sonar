@@ -11,5 +11,5 @@ package openapi
 
 type PostUpdate struct {
 
-	Comentario string `json:"comentario,omitempty"`
+	Comentario string `json:"comentario"`
 }
