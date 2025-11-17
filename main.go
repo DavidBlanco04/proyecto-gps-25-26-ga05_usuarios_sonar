@@ -20,9 +20,11 @@ func main() {
 	defer db.DB.Close()
 
 	usuariosAPI := &sw.UsuariosAPI{DB: db.DB}
+	artistasAPI := &sw.ArtistasAPI{DB: db.DB}
 	
 	routes := sw.ApiHandleFunctions{
 		UsuariosAPI: *usuariosAPI,
+		ArtistasAPI: *artistasAPI,
 	}
 
 	log.Printf("Servidor iniciado")
