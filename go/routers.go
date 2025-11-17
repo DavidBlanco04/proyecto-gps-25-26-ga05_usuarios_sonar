@@ -42,6 +42,7 @@ func NewRouterWithGinEngine(router *gin.Engine, handleFunctions ApiHandleFunctio
 		rutasPublicas := map[string]bool {
 			"POST /usuarios": true,
 			"GET /usuarios": true,
+			"GET /artistas/:idArtista": true,
 			"GET /usuarios/:idUsuario": true,
 		}
 
@@ -98,10 +99,18 @@ type ApiHandleFunctions struct {
 	PostsDeComunidadAPI PostsDeComunidadAPI
 	// Routes for the UsuariosAPI part of the API
 	UsuariosAPI UsuariosAPI
+	// Routes for the ArtistasAPI part of the API
+	ArtistasAPI ArtistasAPI
 }
 
 func getRoutes(handleFunctions ApiHandleFunctions) []Route {
-	return []Route{ 
+	return []Route{
+		{
+			"ArtistasIdArtistaGet",
+			http.MethodGet,
+			"/artistas/:idArtista",
+			handleFunctions.ArtistasAPI.ArtistasIdArtistaGet,
+		},
 		{
 			"UsuariosIdUsuarioDeseosAlbumsGet",
 			http.MethodGet,

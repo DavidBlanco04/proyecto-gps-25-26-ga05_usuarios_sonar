@@ -31,6 +31,7 @@ services:
       DB_PASSWORD: 12345
       JWT_SECRET_KEY: 12345
       GIN_MODE: debug
+      CONTENT_BASE_URL: "http://contenido-app:8080"   # microservicio de contenido
     volumes:
       - .:/app
     command: go run main.go
@@ -43,3 +44,5 @@ volumes:
 networks:
   usuarios-network:
     driver: bridge
+    external: true
+    name: micro-servicios
