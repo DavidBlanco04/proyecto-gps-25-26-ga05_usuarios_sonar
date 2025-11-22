@@ -22,11 +22,13 @@ func main() {
 	usuariosAPI := &sw.UsuariosAPI{DB: db.DB}
 	artistasAPI := &sw.ArtistasAPI{DB: db.DB}
 	postsAPI := &sw.PostsDeComunidadAPI{DB: db.DB}
-	
+	favoritosAPI := &sw.FavoritosAPI{DB: db.DB}
+
 	routes := sw.ApiHandleFunctions{
-		UsuariosAPI: *usuariosAPI,
-		ArtistasAPI: *artistasAPI,
+		UsuariosAPI:         *usuariosAPI,
+		ArtistasAPI:         *artistasAPI,
 		PostsDeComunidadAPI: *postsAPI,
+		FavoritosAPI:        *favoritosAPI,
 	}
 
 	log.Printf("Servidor iniciado")
