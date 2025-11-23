@@ -10,72 +10,309 @@
 package openapi
 
 import (
+	"database/sql"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 )
 
 type FavoritosAPI struct {
+	DB *sql.DB
 }
 
 // Get /usuarios/:idUsuario/favoritos/albums
-// Obtener todos los albumes favoritos de un usuario 
+// Obtener todos los albumes favoritos de un usuario
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosAlbumsGet(c *gin.Context) {
-	// Your handler implementation
-	c.JSON(200, gin.H{"status": "OK"})
+	idUsuarioStr := c.Param("idUsuario")
+	idUsuario, err := strconv.Atoi(idUsuarioStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "idUsuario inválido"})
+		return
+	}
+
+	rows, err := api.DB.Query(`
+		SELECT idAlbum 
+		FROM fav_album 
+		WHERE idUsuario = $1
+	`, idUsuario)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener albumes favoritos"})
+		return
+	}
+	defer rows.Close()
+
+	var favoritos []AlbumFavorito
+
+	for rows.Next() {
+		var f AlbumFavorito
+		if err := rows.Scan(&f.IdAlbum); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error leyendo datos"})
+			return
+		}
+		favoritos = append(favoritos, f)
+	}
+
+	c.JSON(200, gin.H{
+		"status":    "OK",
+		"favoritos": favoritos,
+	})
 }
 
 // Delete /usuarios/:idUsuario/favoritos/albums/:idAlbum
-// Eliminar un album de favoritos 
+// Eliminar un album de favoritos
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosAlbumsIdAlbumDelete(c *gin.Context) {
-	// Your handler implementation
+	idUsuarioStr := c.Param("idUsuario")
+	idAlbumStr := c.Param("idAlbum")
+
+	idUsuario, err1 := strconv.Atoi(idUsuarioStr)
+	idAlbum, err2 := strconv.Atoi(idAlbumStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	result, err := api.DB.Exec(`
+		DELETE FROM fav_album
+		WHERE idUsuario = $1 AND idAlbum = $2
+	`, idUsuario, idAlbum)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar álbum favorito"})
+		return
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "El álbum no estaba en favoritos"})
+		return
+	}
+
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
 // Post /usuarios/:idUsuario/favoritos/albums/:idAlbum
-// Añadir un album a favoritos 
+// Añadir un album a favoritos
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosAlbumsIdAlbumPost(c *gin.Context) {
-	// Your handler implementation
+	idUsuarioStr := c.Param("idUsuario")
+	idAlbumStr := c.Param("idAlbum")
+
+	idUsuario, err1 := strconv.Atoi(idUsuarioStr)
+	idAlbum, err2 := strconv.Atoi(idAlbumStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	_, err := api.DB.Exec(`
+		INSERT INTO fav_album (idUsuario, idAlbum)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING
+	`, idUsuario, idAlbum)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al añadir álbum a favoritos"})
+		return
+	}
+
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
 // Get /usuarios/:idUsuario/favoritos/artistas
-// Obtener todos los artistas favoritos de un usuario 
+// Obtener todos los artistas favoritos de un usuario
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosArtistasGet(c *gin.Context) {
-	// Your handler implementation
-	c.JSON(200, gin.H{"status": "OK"})
+	idUsuarioStr := c.Param("idUsuario")
+	idUsuario, err := strconv.Atoi(idUsuarioStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "idUsuario inválido"})
+		return
+	}
+
+	rows, err := api.DB.Query(`
+		SELECT idArtista
+		FROM fav_artista
+		WHERE idUsuario = $1
+	`, idUsuario)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener artistas favoritos"})
+		return
+	}
+	defer rows.Close()
+
+	var favoritos []ArtistaFavorito
+
+	for rows.Next() {
+		var a ArtistaFavorito
+		if err := rows.Scan(&a.IdArtista); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error leyendo datos"})
+			return
+		}
+		favoritos = append(favoritos, a)
+	}
+	c.JSON(200, gin.H{
+		"status":    "OK",
+		"favoritos": favoritos,
+	})
 }
 
 // Delete /usuarios/:idUsuario/favoritos/artistas/:idArtista
-// Eliminar un artista de favoritos 
+// Eliminar un artista de favoritos
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosArtistasIdArtistaDelete(c *gin.Context) {
-	// Your handler implementation
+	idUsuarioStr := c.Param("idUsuario")
+	idArtistaStr := c.Param("idArtista")
+
+	idUsuario, err1 := strconv.Atoi(idUsuarioStr)
+	idArtista, err2 := strconv.Atoi(idArtistaStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	result, err := api.DB.Exec(`
+		DELETE FROM fav_artista
+		WHERE idUsuario = $1 AND idArtista = $2
+	`, idUsuario, idArtista)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar artista favorito"})
+		return
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "El artista no estaba en favoritos"})
+		return
+	}
+
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
 // Post /usuarios/:idUsuario/favoritos/artistas/:idArtista
-// Añadir un artista a favoritos 
+// Añadir un artista a favoritos
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosArtistasIdArtistaPost(c *gin.Context) {
-	// Your handler implementation
+	idUsuarioStr := c.Param("idUsuario")
+	idArtistaStr := c.Param("idArtista")
+
+	idUsuario, err1 := strconv.Atoi(idUsuarioStr)
+	idArtista, err2 := strconv.Atoi(idArtistaStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	_, err := api.DB.Exec(`
+		INSERT INTO fav_artista (idUsuario, idArtista)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING
+	`, idUsuario, idArtista)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al añadir artista a favoritos"})
+		return
+	}
+
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
 // Get /usuarios/:idUsuario/favoritos/canciones
-// Obtener todas las canciones favoritas de un usuario 
+// Obtener todas las canciones favoritas de un usuario
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesGet(c *gin.Context) {
-	// Your handler implementation
-	c.JSON(200, gin.H{"status": "OK"})
+	idUsuarioStr := c.Param("idUsuario")
+	idUsuario, err := strconv.Atoi(idUsuarioStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "idUsuario inválido"})
+		return
+	}
+
+	rows, err := api.DB.Query(`
+		SELECT idCancion
+		FROM fav_cancion
+		WHERE idUsuario = $1
+	`, idUsuario)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener canciones favoritas"})
+		return
+	}
+	defer rows.Close()
+
+	var favoritos []CancionFavorita
+
+	for rows.Next() {
+		var cCancion CancionFavorita
+		if err := rows.Scan(&cCancion.IdCancion); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error leyendo datos"})
+			return
+		}
+		favoritos = append(favoritos, cCancion)
+	}
+
+	c.JSON(200, gin.H{
+		"status":    "OK",
+		"favoritos": favoritos,
+	})
 }
 
 // Delete /usuarios/:idUsuario/favoritos/canciones/:idCancion
-// Eliminar una cancion de favoritos 
+// Eliminar una canción de favoritos
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesIdCancionDelete(c *gin.Context) {
-	// Your handler implementation
+	idUsuarioStr := c.Param("idUsuario")
+	idCancionStr := c.Param("idCancion")
+
+	idUsuario, err1 := strconv.Atoi(idUsuarioStr)
+	idCancion, err2 := strconv.Atoi(idCancionStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	result, err := api.DB.Exec(`
+		DELETE FROM fav_cancion
+		WHERE idUsuario = $1 AND idCancion = $2
+	`, idUsuario, idCancion)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar canción favorita"})
+		return
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "La canción no estaba en favoritos"})
+		return
+	}
+
 	c.JSON(200, gin.H{"status": "OK"})
 }
 
 // Post /usuarios/:idUsuario/favoritos/canciones/:idCancion
-// Añadir una cancion a favoritos 
+// Añadir una canción a favoritos
 func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesIdCancionPost(c *gin.Context) {
-	// Your handler implementation
+	idUsuarioStr := c.Param("idUsuario")
+	idCancionStr := c.Param("idCancion")
+
+	idUsuario, err1 := strconv.Atoi(idUsuarioStr)
+	idCancion, err2 := strconv.Atoi(idCancionStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	_, err := api.DB.Exec(`
+		INSERT INTO fav_cancion (idUsuario, idCancion)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING
+	`, idUsuario, idCancion)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al añadir canción a favoritos"})
+		return
+	}
+
 	c.JSON(200, gin.H{"status": "OK"})
 }
-

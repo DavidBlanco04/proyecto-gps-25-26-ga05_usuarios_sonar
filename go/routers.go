@@ -11,8 +11,10 @@ package openapi
 
 import (
 	"net/http"
-
+	"usuarios/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 // Route is the information for every URI.
@@ -34,6 +36,39 @@ func NewRouter(handleFunctions ApiHandleFunctions) *gin.Engine {
 
 // NewRouter add routes to existing gin engine.
 func NewRouterWithGinEngine(router *gin.Engine, handleFunctions ApiHandleFunctions) *gin.Engine {
+	// Agregar el middleware CORS globalmente
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"}, // Permite solo el frontend local en el puerto 5173
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	
+	// El middleware decide si aplicar autenticación basándose en el endpoint
+	router.Use(func(c *gin.Context) {
+		// Rutas públicas
+		rutasPublicas := map[string]bool {
+			"POST /usuarios": true,
+			"GET /usuarios": true,
+			"GET /artistas/:idArtista": true,
+			"GET /usuarios/:idUsuario": true,
+		}
+
+		// Se formatea la clave de la ruta actual
+		claveRuta := c.Request.Method + " " + c.FullPath()
+
+		// Se comprueba si la ruta está entre las públicas
+		if !rutasPublicas[claveRuta] {
+			authMiddleware := middleware.Auth()
+			authMiddleware(c)
+		}
+
+		c.Next()
+	})
+
+	// Se añaden las rutas
 	for _, route := range getRoutes(handleFunctions) {
 		if route.HandlerFunc == nil {
 			route.HandlerFunc = DefaultHandleFunc
@@ -74,10 +109,18 @@ type ApiHandleFunctions struct {
 	PostsDeComunidadAPI PostsDeComunidadAPI
 	// Routes for the UsuariosAPI part of the API
 	UsuariosAPI UsuariosAPI
+	// Routes for the ArtistasAPI part of the API
+	ArtistasAPI ArtistasAPI
 }
 
 func getRoutes(handleFunctions ApiHandleFunctions) []Route {
-	return []Route{ 
+	return []Route{
+		{
+			"ArtistasIdArtistaGet",
+			http.MethodGet,
+			"/artistas/:idArtista",
+			handleFunctions.ArtistasAPI.ArtistasIdArtistaGet,
+		},
 		{
 			"UsuariosIdUsuarioDeseosAlbumsGet",
 			http.MethodGet,
