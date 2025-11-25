@@ -10,6 +10,10 @@
 package openapi
 
 type ArtistaFavorito struct {
-
 	IdArtista int32 `json:"idArtista"`
+}
+
+type GetArtistaFavorito struct {
+	IdArtista int32  `json:"idArtista"`
+	Nombre    string `json:"nombre"`
 }
