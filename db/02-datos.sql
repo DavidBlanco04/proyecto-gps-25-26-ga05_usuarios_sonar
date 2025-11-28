@@ -19,20 +19,20 @@ INSERT INTO usuario (nombre, correo, contrasena, direccion, telefono, descripcio
 ('Pablo Torres', 'pablo@example.com', 'hash_contra_4', 'Calle Luna 8, Barcelona', '644556677',
  'Administrador del sistema y soporte técnico.', 'https://img.com/pablo.jpg', 1),
 
-('Marta Gómez', 'marta@example.com', 'hash_contra_5', 'Calle Sol 20, Bilbao', '655667788',
- 'Cantante y productora musical (Artista).', 'https://img.com/marta.jpg', 2),
+('Aitana Ocaña', 'aitana@example.com', 'hash_contra_5', 'Calle Sol 20, Bilbao', '655667788',
+ 'Cantante y productora musical (Artista).', 'https://img.com/aitana.jpg', 2),
 
-('Lucía Fernández', 'lucia@example.com', 'hash_contra_6', 'Calle Norte 23, Granada', '666778899',
- 'Apasionada del jazz y la música acústica (Artista).', 'https://img.com/lucia.jpg', 2),
+('Artic Monkeys', 'am@example.com', 'hash_contra_6', 'Calle Norte 23, Granada', '666778899',
+ 'Apasionada del jazz y la música acústica (Artista).', 'https://img.com/am.jpg', 2),
 
-('Sergio Morales', 'sergio@example.com', 'hash_contra_7', 'Av. del Mar 17, Cádiz', '677889900',
- 'Batería en un grupo de rock local (Artista).', 'https://img.com/sergio.jpg', 2),
+('Bad Bunny', 'badb@example.com', 'hash_contra_7', 'Av. del Mar 17, Cádiz', '677889900',
+ 'Batería en un grupo de rock local (Artista).', 'https://img.com/badb.jpg', 2),
 
-('Nuria Ramos', 'nuria@example.com', 'hash_contra_8', 'Paseo del Prado 11, Madrid', '688990011',
- 'Le encantan los conciertos en vivo.', 'https://img.com/nuria.jpg', 4),
+('Vetusta Morla', 'vetusta@example.com', 'hash_contra_8', 'Paseo del Prado 11, Madrid', '688990011',
+ 'Le encantan los conciertos en vivo.', 'https://img.com/vetusta.jpg', 2),
 
-('David Alonso', 'david@example.com', 'hash_contra_9', 'Calle Esperanza 34, Zaragoza', '699001122',
- 'Coleccionista de vinilos antiguos.', 'https://img.com/david.jpg', 3),
+('David Guetta', 'dguetta@example.com', 'hash_contra_9', 'Calle Esperanza 34, Zaragoza', '699001122',
+ 'Coleccionista de vinilos antiguos.', 'https://img.com/dguetta.jpg', 2),
 
 ('Elena Navarro', 'elena@example.com', 'hash_contra_10', 'Calle Verde 90, Málaga', '610112233',
  'Descubridora de nuevos talentos.', 'https://img.com/elena.jpg', 4);
