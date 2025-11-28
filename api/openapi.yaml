@@ -1,1081 +1,869 @@
 openapi: 3.0.4
 info:
+  title: Microservicio de Usuarios - Undersounds
+  version: 1.1.0
   description: |-
     Especificacion OpenAPI del microservicio de "Usuarios" dentro del proyecto "Undersounds" de GPS/ASEE.
 
     Este microservicio gestiona:
     - Usuarios y tipos de usuario
-    - Listas de reproduccion personales
     - Favoritos (canciones, albumes, artistas)
-    - Albumes deseados (wishlist)
     - Posts en comunidades
-    - Historial de compras
+    - Obtención de información de artistas
 
-    El codigo del proyecto esta disponible en el [repositorio de GitHub](https://github.com/UniExtremadura/proyecto-gps-25-26-ga05).
-  title: Microservicio de Usuarios - Undersounds
-  version: 1.0.0
+    El codigo del proyecto esta disponible en el repositorio de GitHub: https://github.com/UniExtremadura/proyecto-gps-25-26-ga05
 servers:
 - url: /
 paths:
   /usuarios:
     get:
-      parameters:
-      - description: Termino de busqueda para filtrar usuarios por nombre
-        example: juan
-        explode: true
-        in: query
-        name: q
-        required: false
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Usuario"
-                type: array
-          description: Lista de usuarios obtenida correctamente
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Parametros invalidos
       summary: Buscar usuarios por nombre
       tags:
       - Usuarios
+      parameters:
+      - name: q
+        in: query
+        description: Termino de busqueda para filtrar usuarios por nombre (requerido)
+        required: true
+        schema:
+          type: string
+        example: juan
+      responses:
+        "200":
+          description: Lista de usuarios obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+        "400":
+          description: Parámetro de búsqueda ausente o inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
     post:
+      summary: Registrar un nuevo usuario o iniciar sesión
+      tags:
+      - Usuarios
       requestBody:
+        description: Para registro envíe todos los campos de UsuarioCreate. Para login puede enviar sólo correo y contrasena.
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UsuarioCreate"
-        required: true
       responses:
         "201":
+          description: Usuario registrado correctamente
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Usuario"
-          description: Usuario registrado correctamente
-        "400":
+        "200":
+          description: Login correcto
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Datos de entrada invalidos
-      summary: Registrar un nuevo usuario
-      tags:
-      - Usuarios
+                $ref: "#/components/schemas/Usuario"
+        "400":
+          description: Datos de entrada invalidos o correo ya registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "401":
+          description: Credenciales inválidas (login)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
   /usuarios/{idUsuario}:
     delete:
-      parameters:
-      - description: ID del usuario
-        explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: Usuario eliminado correctamente
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
       summary: Eliminar un usuario por su ID
       tags:
       - Usuarios
-    get:
       parameters:
-      - description: ID del usuario
-        explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
+        description: ID del usuario
         required: true
         schema:
           type: integer
-        style: simple
+      responses:
+        "204":
+          description: Usuario eliminado correctamente
+        "400":
+          description: ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    get:
+      summary: Obtener los datos de un usuario por su ID
+      tags:
+      - Usuarios
+      parameters:
+      - name: idUsuario
+        in: path
+        description: ID del usuario
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
+          description: Usuario obtenido correctamente
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Usuario"
-          description: Usuario obtenido correctamente
-        "404":
+        "400":
+          description: ID inválido
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
           description: Usuario no encontrado
-      summary: Obtener los datos de un usuario por su ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    patch:
+      summary: Modificar los datos de un usuario existente
       tags:
       - Usuarios
-    patch:
       parameters:
-      - description: ID del usuario
-        explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
+        description: ID del usuario
         required: true
         schema:
           type: integer
-        style: simple
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UsuarioUpdate"
-        required: true
       responses:
         "200":
+          description: Usuario modificado con exito
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Usuario"
-          description: Usuario modificado con exito
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
           description: Datos de entrada invalidos
-        "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
           description: Usuario no encontrado
-      summary: Modificar los datos de un usuario existente
-      tags:
-      - Usuarios
-  /usuarios/{idUsuario}/listas:
-    get:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
           content:
             application/json:
               schema:
-                items:
-                  $ref: "#/components/schemas/Lista"
-                type: array
-          description: Listas obtenidas correctamente
-        "404":
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
-      summary: Obtener todas las listas de reproduccion de un usuario
-      tags:
-      - Listas de Reproduccion
-    post:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ListaCreate"
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lista"
-          description: Lista creada correctamente
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Datos invalidos
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
-      summary: Crear una nueva lista de reproduccion
-      tags:
-      - Listas de Reproduccion
-  /listas/{idLista}:
-    delete:
-      parameters:
-      - explode: false
-        in: path
-        name: idLista
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: Lista eliminada correctamente
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Lista no encontrada
-      summary: Eliminar una lista de reproduccion
-      tags:
-      - Listas de Reproduccion
-    get:
-      parameters:
-      - explode: false
-        in: path
-        name: idLista
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListaDetalle"
-          description: Lista obtenida correctamente
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Lista no encontrada
-      summary: Obtener detalles de una lista de reproduccion
-      tags:
-      - Listas de Reproduccion
-    patch:
-      parameters:
-      - explode: false
-        in: path
-        name: idLista
-        required: true
-        schema:
-          type: integer
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ListaUpdate"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lista"
-          description: Lista modificada correctamente
-        "404":
-          description: Lista no encontrada
-        "400":
-          description: Datos inválidos
-      summary: Modificar una lista de reproducción
-      tags:
-      - Listas de Reproduccion
-  /listas/{idLista}/canciones/{idCancion}:
-    delete:
-      parameters:
-      - explode: false
-        in: path
-        name: idLista
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idCancion
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: Cancion eliminada de la lista
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Lista o cancion no encontrada
-      summary: Eliminar una cancion de una lista de reproduccion
-      tags:
-      - Listas de Reproduccion
-    post:
-      parameters:
-      - explode: false
-        in: path
-        name: idLista
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idCancion
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "201":
-          description: Cancion añadida a la lista
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Lista o cancion no encontrada
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: La cancion ya esta en la lista
-      summary: Añadir una cancion a una lista de reproduccion
-      tags:
-      - Listas de Reproduccion
-  /usuarios/{idUsuario}/favoritos/canciones:
-    get:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/CancionFavorita"
-                type: array
-          description: Lista de canciones favoritas
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
-      summary: Obtener todas las canciones favoritas de un usuario
-      tags:
-      - Favoritos
-  /usuarios/{idUsuario}/favoritos/canciones/{idCancion}:
-    delete:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idCancion
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: Cancion eliminada de favoritos
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o cancion no encontrados
-      summary: Eliminar una cancion de favoritos
-      tags:
-      - Favoritos
-    post:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idCancion
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "201":
-          description: Cancion añadida a favoritos
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o cancion no encontrados
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: La cancion ya esta en favoritos
-      summary: Añadir una cancion a favoritos
-      tags:
-      - Favoritos
+                $ref: "#/components/schemas/ErrorMessage"
+
   /usuarios/{idUsuario}/favoritos/albums:
     get:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/AlbumFavorito"
-                type: array
-          description: Lista de albumes favoritos
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
       summary: Obtener todos los albumes favoritos de un usuario
       tags:
       - Favoritos
-  /usuarios/{idUsuario}/favoritos/albums/{idAlbum}:
-    delete:
       parameters:
-      - explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
+        description: ID del usuario
         required: true
         schema:
           type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idAlbum
-        required: true
-        schema:
-          type: integer
-        style: simple
       responses:
-        "204":
-          description: Album eliminado de favoritos
-        "404":
+        "200":
+          description: Lista de álbumes favoritos (envoltorio con estado)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o album no encontrados
+                $ref: "#/components/schemas/FavoritosResponseAlbum"
+        "400":
+          description: idUsuario inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /usuarios/{idUsuario}/favoritos/albums/{idAlbum}:
+    delete:
       summary: Eliminar un album de favoritos
       tags:
       - Favoritos
-    post:
       parameters:
-      - explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
         required: true
         schema:
           type: integer
-        style: simple
-      - explode: false
+      - name: idAlbum
         in: path
-        name: idAlbum
         required: true
         schema:
           type: integer
-        style: simple
       responses:
-        "201":
-          description: Album añadido a favoritos
+        "200":
+          description: Álbum eliminado de favoritos (status OK)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleStatus"
+        "400":
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
         "404":
+          description: El álbum no estaba en favoritos
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o album no encontrados
-        "409":
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: El album ya esta en favoritos
+                $ref: "#/components/schemas/ErrorMessage"
+    post:
       summary: Añadir un album a favoritos
       tags:
       - Favoritos
-  /usuarios/{idUsuario}/favoritos/artistas:
-    get:
       parameters:
-      - explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
         required: true
         schema:
           type: integer
-        style: simple
+      - name: idAlbum
+        in: path
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
+          description: Álbum añadido (o ya existente) — devuelve estado OK
           content:
             application/json:
               schema:
-                items:
-                  $ref: "#/components/schemas/ArtistaFavorito"
-                type: array
-          description: Lista de artistas favoritos
-        "404":
+                $ref: "#/components/schemas/SimpleStatus"
+        "400":
+          description: Parámetros inválidos
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /usuarios/{idUsuario}/favoritos/artistas:
+    get:
       summary: Obtener todos los artistas favoritos de un usuario
       tags:
       - Favoritos
-  /usuarios/{idUsuario}/favoritos/artistas/{idArtista}:
-    delete:
       parameters:
-      - explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
+        description: ID del usuario
         required: true
         schema:
           type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idArtista
-        required: true
-        schema:
-          type: integer
-        style: simple
       responses:
-        "204":
-          description: Artista eliminado de favoritos
-        "404":
+        "200":
+          description: Lista de artistas favoritos (envoltorio con estado)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o artista no encontrados
+                $ref: "#/components/schemas/FavoritosResponseArtista"
+        "400":
+          description: idUsuario inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /usuarios/{idUsuario}/favoritos/artistas/{idArtista}:
+    delete:
       summary: Eliminar un artista de favoritos
       tags:
       - Favoritos
-    post:
       parameters:
-      - explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
         required: true
         schema:
           type: integer
-        style: simple
-      - explode: false
+      - name: idArtista
         in: path
-        name: idArtista
         required: true
         schema:
           type: integer
-        style: simple
       responses:
-        "201":
-          description: Artista añadido a favoritos
+        "200":
+          description: Artista eliminado de favoritos (status OK)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleStatus"
+        "400":
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
         "404":
+          description: El artista no estaba en favoritos
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o artista no encontrados
-        "409":
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: El artista ya esta en favoritos
+                $ref: "#/components/schemas/ErrorMessage"
+    post:
       summary: Añadir un artista a favoritos
       tags:
       - Favoritos
-  /usuarios/{idUsuario}/deseos/albums:
-    get:
       parameters:
-      - explode: false
+      - name: idUsuario
         in: path
-        name: idUsuario
         required: true
         schema:
           type: integer
-        style: simple
+      - name: idArtista
+        in: path
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
+          description: Artista añadido (o ya existente) — devuelve estado OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AlbumDeseado"
-          description: Lista de albumes deseados
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
-      summary: Obtener lista de albumes deseados (wishlist)
-      tags:
-      - Albumes Deseados
-  /usuarios/{idUsuario}/deseos/albums/{idAlbum}:
-    delete:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idAlbum
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: Album eliminado de la lista de deseos
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o album no encontrados
-      summary: Eliminar un album de la lista de deseos
-      tags:
-      - Albumes Deseados
-    post:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idAlbum
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "201":
-          description: Album añadido a la lista de deseos
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o album no encontrados
-        "409":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: El album ya esta en la lista de deseos
-      summary: Añadir un album a la lista de deseos
-      tags:
-      - Albumes Deseados
-  /usuarios/{idUsuario}/compras:
-    get:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Compra"
-                type: array
-          description: Historial de compras obtenido
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario no encontrado
-      summary: Obtener historial de compras de un usuario
-      tags:
-      - Compras
-  /usuarios/{idUsuario}/compras/{idMerch}:
-    post:
-      parameters:
-      - explode: false
-        in: path
-        name: idUsuario
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - explode: false
-        in: path
-        name: idMerch
-        required: true
-        schema:
-          type: integer
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CompraCreate"
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Compra"
-          description: Compra realizada correctamente
+                $ref: "#/components/schemas/SimpleStatus"
         "400":
+          description: Parámetros inválidos
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Datos invalidos
-        "404":
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Usuario o producto no encontrado
-      summary: Registrar una compra de merchandising
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /usuarios/{idUsuario}/favoritos/canciones:
+    get:
+      summary: Obtener todas las canciones favoritas de un usuario
       tags:
-      - Compras
+      - Favoritos
+      parameters:
+      - name: idUsuario
+        in: path
+        description: ID del usuario
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Lista de canciones favoritas (envoltorio con estado)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoritosResponseCancion"
+        "400":
+          description: idUsuario inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /usuarios/{idUsuario}/favoritos/canciones/{idCancion}:
+    delete:
+      summary: Eliminar una canción de favoritos
+      tags:
+      - Favoritos
+      parameters:
+      - name: idUsuario
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: idCancion
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Canción eliminada de favoritos (status OK)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleStatus"
+        "400":
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: La canción no estaba en favoritos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    post:
+      summary: Añadir una canción a favoritos
+      tags:
+      - Favoritos
+      parameters:
+      - name: idUsuario
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: idCancion
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Canción añadida (o ya existente) — devuelve estado OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleStatus"
+        "400":
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
   /comunidades/{idComunidad}/posts:
     get:
-      parameters:
-      - explode: false
-        in: path
-        name: idComunidad
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Post"
-                type: array
-          description: Lista de posts obtenida
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Comunidad no encontrada
       summary: Obtener posts de una comunidad
       tags:
       - Posts de Comunidad
-    post:
       parameters:
-      - explode: false
+      - name: idComunidad
         in: path
-        name: idComunidad
         required: true
         schema:
           type: integer
-        style: simple
+      responses:
+        "200":
+          description: Lista de posts obtenida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "400":
+          description: ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    post:
+      summary: Crear un nuevo post en una comunidad
+      tags:
+      - Posts de Comunidad
+      parameters:
+      - name: idComunidad
+        in: path
+        required: true
+        schema:
+          type: integer
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/PostCreate"
-        required: true
       responses:
         "201":
+          description: Post creado correctamente
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
-          description: Post creado correctamente
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
           description: Datos invalidos
-        "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-          description: Comunidad no encontrada
-      summary: Crear un nuevo post en una comunidad
-      tags:
-      - Posts de Comunidad
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno / comunidad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
   /posts/{idPost}:
     delete:
-      parameters:
-      - explode: false
-        in: path
-        name: idPost
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: Post eliminado correctamente
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Post no encontrado
       summary: Eliminar un post
       tags:
       - Posts de Comunidad
-    get:
       parameters:
-      - explode: false
+      - name: idPost
         in: path
-        name: idPost
         required: true
         schema:
           type: integer
-        style: simple
+      responses:
+        "204":
+          description: Post eliminado correctamente
+        "400":
+          description: ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Post no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    get:
+      summary: Obtener detalles de un post
+      tags:
+      - Posts de Comunidad
+      parameters:
+      - name: idPost
+        in: path
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
+          description: Post obtenido correctamente
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
-          description: Post obtenido correctamente
-        "404":
+        "400":
+          description: ID inválido
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
           description: Post no encontrado
-      summary: Obtener detalles de un post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    patch:
+      summary: Modificar un post
       tags:
       - Posts de Comunidad
-    patch:
       parameters:
-      - explode: false
+      - name: idPost
         in: path
-        name: idPost
         required: true
         schema:
           type: integer
-        style: simple
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/PostUpdate"
-        required: true
       responses:
         "200":
+          description: Post modificado correctamente
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
-          description: Post modificado correctamente
-        "404":
-          description: Post no encontrado
         "400":
           description: Datos inválidos
-      summary: Modificar un post
-      tags:
-      - Posts de Comunidad
-  /posts/{idPost}/respuestas:
-    get:
-      parameters:
-      - explode: false
-        in: path
-        name: idPost
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Post no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /posts/{idPost}/respuestas:
+    get:
+      summary: Obtener respuestas a un post
+      tags:
+      - Posts de Comunidad
+      parameters:
+      - name: idPost
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Lista de respuestas obtenida
+          content:
+            application/json:
+              schema:
+                type: array
                 items:
                   $ref: "#/components/schemas/Post"
-                type: array
-          description: Lista de respuestas obtenida
-        "404":
+        "400":
+          description: ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Error interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /artistas/{idArtista}:
+    get:
+      summary: Obtener información pública de un artista
+      tags:
+      - Artistas
+      parameters:
+      - name: idArtista
+        in: path
+        description: ID del artista
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Información pública del artista
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistaPublico"
+        "400":
+          description: ID de artista inválido
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-          description: Post no encontrado
-      summary: Obtener respuestas a un post
-      tags:
-      - Posts de Comunidad
+        "404":
+          description: Artista no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
 components:
   schemas:
+    # Usuario principal
     Usuario:
-      example:
-        descripcion: Amante de la musica indie y rock alternativo
-        tipo: 2
-        correo: juan@example.com
-        direccion: "Calle Mayor 123, Caceres"
-        id: 1
-        telefono: "+34612345678"
-        nombre: Juan Perez
-        urlImagen: https://example.com/avatars/juan.jpg
+      type: object
       properties:
         id:
-          example: 1
-          readOnly: true
           type: integer
+          readOnly: true
+          example: 1
         nombre:
+          type: string
           example: Juan Perez
-          type: string
         correo:
-          example: juan@example.com
+          type: string
           format: email
-          type: string
+          example: juan@example.com
         direccion:
+          type: string
           example: "Calle Mayor 123, Caceres"
-          type: string
         telefono:
+          type: string
           example: "+34612345678"
-          type: string
         descripcion:
+          type: string
           example: Amante de la musica indie y rock alternativo
-          type: string
         urlImagen:
-          example: https://example.com/avatars/juan.jpg
-          format: uri
           type: string
+          format: uri
+          example: https://example.com/avatars/juan.jpg
         tipo:
+          type: integer
           description: ID del tipo de usuario (FK a tipoUsuario)
           example: 2
-          type: integer
       required:
-      - correo
       - id
       - nombre
+      - correo
       - tipo
-      type: object
+
     UsuarioCreate:
-      example:
-        descripcion: Amante de la musica indie
-        tipo: 1
-        correo: juan@example.com
-        direccion: "Calle Mayor 123, Caceres"
-        contrasena: miPassword123
-        telefono: "+34612345678"
-        nombre: Juan Perez
-        urlImagen: https://example.com/avatars/juan.jpg
+      type: object
       properties:
         nombre:
+          type: string
           example: Juan Perez
-          type: string
         correo:
+          type: string
+          format: email
           example: juan@example.com
-          format: email
-          type: string
         contrasena:
-          example: miPassword123
-          format: password
           type: string
+          format: password
+          example: miPassword123
           writeOnly: true
         direccion:
+          type: string
           example: "Calle Mayor 123, Caceres"
-          type: string
         telefono:
+          type: string
           example: "+34612345678"
-          type: string
         descripcion:
+          type: string
           example: Amante de la musica indie
-          type: string
         urlImagen:
-          example: https://example.com/avatars/juan.jpg
-          format: uri
           type: string
+          format: uri
+          example: https://example.com/avatars/juan.jpg
         tipo:
-          description: ID del tipo de usuario
-          example: 1
           type: integer
+          example: 1
       required:
-      - contrasena
-      - correo
       - nombre
+      - correo
+      - contrasena
       - tipo
-      type: object
+
     UsuarioUpdate:
-      example:
-        descripcion: descripcion
-        correo: correo
-        direccion: direccion
-        contrasena: contrasena
-        telefono: telefono
-        nombre: nombre
-        urlImagen: https://openapi-generator.tech
+      type: object
       properties:
         nombre:
           type: string
         correo:
+          type: string
           format: email
-          type: string
         contrasena:
-          format: password
           type: string
+          format: password
           writeOnly: true
         direccion:
           type: string
@@ -1084,247 +872,221 @@ components:
         descripcion:
           type: string
         urlImagen:
+          type: string
           format: uri
-          type: string
-      type: object
-    Lista:
-      example:
-        idUsuario: 1
-        id: 1
-        nombre: Mis favoritas 2024
-        urlImagen: https://example.com/playlists/cover1.jpg
-      properties:
-        id:
-          example: 1
-          readOnly: true
-          type: integer
-        nombre:
-          example: Mis favoritas 2024
-          type: string
-        urlImagen:
-          example: https://example.com/playlists/cover1.jpg
-          format: uri
-          type: string
-        idUsuario:
-          example: 1
-          type: integer
-      required:
-      - id
-      - idUsuario
-      - nombre
-      type: object
-    ListaCreate:
-      example:
-        nombre: Mis favoritas 2024
-        urlImagen: https://example.com/playlists/cover1.jpg
-      properties:
-        nombre:
-          example: Mis favoritas 2024
-          type: string
-        urlImagen:
-          example: https://example.com/playlists/cover1.jpg
-          format: uri
-          type: string
-      required:
-      - nombre
-      type: object
-    ListaUpdate:
-      example:
-        nombre: nombre
-        urlImagen: https://openapi-generator.tech
-      properties:
-        nombre:
-          type: string
-        urlImagen:
-          format: uri
-          type: string
-      type: object
-    ListaDetalle:
-      allOf:
-      - $ref: "#/components/schemas/Lista"
-      - properties:
-          canciones:
-            items:
-              $ref: "#/components/schemas/ListaDetalle_allOf_canciones"
-            type: array
-        type: object
-      example:
-        canciones:
-        - idCancion: 0
-        - idCancion: 0
-        idUsuario: 1
-        id: 1
-        nombre: Mis favoritas 2024
-        urlImagen: https://example.com/playlists/cover1.jpg
-    Compra:
-      example:
-        fechaCompra: 2024-10-01T14:30:00Z
-        idUsuario: 1
-        idMerch: 5
-        cantidad: 2
-        precioTotal: 49.99
-      properties:
-        idUsuario:
-          example: 1
-          type: integer
-        idMerch:
-          example: 5
-          type: integer
-        fechaCompra:
-          example: 2024-10-01T14:30:00Z
-          format: date-time
-          type: string
-        cantidad:
-          example: 2
-          type: integer
-        precioTotal:
-          example: 49.99
-          format: float
-          type: number
-      required:
-      - cantidad
-      - idMerch
-      - idUsuario
-      type: object
-    CompraCreate:
-      example:
-        cantidad: 2
-      properties:
-        cantidad:
-          example: 2
-          minimum: 1
-          type: integer
-      required:
-      - cantidad
-      type: object
+
+    # Posts
     Post:
-      example:
-        postPadre: 0
-        idUsuario: 1
-        fechaCreacion: 2024-10-06T12:00:00Z
-        id: 1
-        idComunidad: 3
-        comentario: ¡Increible concierto de anoche!
+      type: object
       properties:
         id:
-          example: 1
+          type: integer
           readOnly: true
-          type: integer
-        comentario:
-          example: ¡Increible concierto de anoche!
-          type: string
-        postPadre:
-          description: ID del post padre si es una respuesta
-          nullable: true
-          type: integer
-          example: null
-        idUsuario:
           example: 1
+        comentario:
+          type: string
+          example: "¡Increible concierto de anoche!"
+        postPadre:
           type: integer
+          nullable: true
+          example: null
+          description: ID del post padre si es una respuesta
+        idUsuario:
+          type: integer
+          example: 1
         idComunidad:
-          example: 3
           type: integer
+          example: 3
         fechaCreacion:
-          example: 2024-10-06T12:00:00Z
+          type: string
           format: date-time
           readOnly: true
-          type: string
+          example: 2024-10-06T12:00:00Z
       required:
-      - comentario
       - id
-      - idComunidad
+      - comentario
       - idUsuario
-      type: object
+      - idComunidad
+
     PostCreate:
-      example:
-        postPadre: 0
-        idUsuario: 1
-        comentario: ¡Increible concierto de anoche!
+      type: object
       properties:
         comentario:
-          example: ¡Increible concierto de anoche!
           type: string
+          example: "¡Increible concierto de anoche!"
         postPadre:
-          description: ID del post padre si es una respuesta
-          nullable: true
           type: integer
+          nullable: true
           example: null
         idUsuario:
-          example: 1
           type: integer
+          example: 1
       required:
       - comentario
       - idUsuario
-      type: object
+
     PostUpdate:
-      example:
-        comentario: ¡Increible concierto de anoche! (editado)
+      type: object
       properties:
         comentario:
-          example: ¡Increible concierto de anoche! (editado)
           type: string
       required:
       - comentario
-      type: object
+
+    # Respuestas de error
     Error:
-      example:
-        codigo: 404
-        mensaje: Recurso no encontrado
+      type: object
       properties:
         codigo:
-          example: 404
           type: integer
+          example: 404
         mensaje:
-          example: Recurso no encontrado
           type: string
+          example: Recurso no encontrado
       required:
       - codigo
       - mensaje
+
+    ErrorMessage:
       type: object
+      properties:
+        error:
+          type: string
+          example: "Mensaje de error descriptivo"
+
+    AlbumFavorito:
+      type: object
+      properties:
+        idAlbum:
+          type: integer
+          example: 456
+        titulo:
+          type: string
+          example: "Ejemplo Album"
+        portada:
+          type: string
+          format: uri
+          example: "https://example.com/albums/456.jpg"
+      required:
+      - idAlbum
+
     CancionFavorita:
-      example:
-        idCancion: 123
+      type: object
       properties:
         idCancion:
-          example: 123
           type: integer
+          example: 123
+        nombre:
+          type: string
+          example: "Ejemplo Cancion"
       required:
       - idCancion
-      type: object
-    AlbumFavorito:
-      example:
-        idAlbum: 456
-      properties:
-        idAlbum:
-          example: 456
-          type: integer
-      required:
-      - idAlbum
-      type: object
+
     ArtistaFavorito:
-      example:
-        idArtista: 789
+      type: object
       properties:
         idArtista:
-          example: 789
           type: integer
+          example: 789
+        nombre:
+          type: string
+          example: "Ejemplo Artista"
       required:
       - idArtista
+
+    SimpleStatus:
       type: object
-    AlbumDeseado:
-      example:
-        idAlbum: 456
+      properties:
+        status:
+          type: string
+          example: OK
+
+    FavoritosResponseAlbum:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+        favoritos:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumFavorito"
+
+    FavoritosResponseArtista:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+        favoritos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtistaFavorito"
+
+    FavoritosResponseCancion:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+        favoritos:
+          type: array
+          items:
+            $ref: "#/components/schemas/CancionFavorita"
+
+    # Artistas (endpoint público)
+    ArtistaPublico:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+        nombre:
+          type: string
+          example: "La Banda"
+        biografia:
+          type: string
+          example: "Banda indie de ejemplo."
+        imagen:
+          type: string
+          format: uri
+          example: "https://example.com/artistas/42.jpg"
+        enlaces:
+          type: array
+          items:
+            $ref: "#/components/schemas/Enlace"
+        discografia:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumResumen"
+      required:
+      - id
+      - nombre
+
+    Enlace:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Sitio oficial"
+        url:
+          type: string
+          format: uri
+          example: "https://labanda.example.com"
+
+    AlbumResumen:
+      type: object
       properties:
         idAlbum:
-          example: 456
           type: integer
-      required:
-      - idAlbum
-      type: object
-    ListaDetalle_allOf_canciones:
-      example:
-        idCancion: 0
-      properties:
-        idCancion:
+          example: 100
+        titulo:
+          type: string
+          example: "Primer Album"
+        año:
           type: integer
-      type: object
+          example: 2020
+        portada:
+          type: string
+          format: uri
+          example: "https://example.com/albums/100.jpg"

@@ -19,49 +19,23 @@ INSERT INTO usuario (nombre, correo, contrasena, direccion, telefono, descripcio
 ('Pablo Torres', 'pablo@example.com', 'hash_contra_4', 'Calle Luna 8, Barcelona', '644556677',
  'Administrador del sistema y soporte técnico.', 'https://img.com/pablo.jpg', 1),
 
-('Marta Gómez', 'marta@example.com', 'hash_contra_5', 'Calle Sol 20, Bilbao', '655667788',
- 'Cantante y productora musical (Artista).', 'https://img.com/marta.jpg', 2),
+('Aitana Ocaña', 'aitana@example.com', 'hash_contra_5', 'Calle Sol 20, Bilbao', '655667788',
+ 'Cantante y productora musical (Artista).', 'https://img.com/aitana.jpg', 2),
 
-('Lucía Fernández', 'lucia@example.com', 'hash_contra_6', 'Calle Norte 23, Granada', '666778899',
- 'Apasionada del jazz y la música acústica (Artista).', 'https://img.com/lucia.jpg', 2),
+('Artic Monkeys', 'am@example.com', 'hash_contra_6', 'Calle Norte 23, Granada', '666778899',
+ 'Apasionada del jazz y la música acústica (Artista).', 'https://img.com/am.jpg', 2),
 
-('Sergio Morales', 'sergio@example.com', 'hash_contra_7', 'Av. del Mar 17, Cádiz', '677889900',
- 'Batería en un grupo de rock local (Artista).', 'https://img.com/sergio.jpg', 2),
+('Bad Bunny', 'badb@example.com', 'hash_contra_7', 'Av. del Mar 17, Cádiz', '677889900',
+ 'Batería en un grupo de rock local (Artista).', 'https://img.com/badb.jpg', 2),
 
-('Nuria Ramos', 'nuria@example.com', 'hash_contra_8', 'Paseo del Prado 11, Madrid', '688990011',
- 'Le encantan los conciertos en vivo.', 'https://img.com/nuria.jpg', 4),
+('Vetusta Morla', 'vetusta@example.com', 'hash_contra_8', 'Paseo del Prado 11, Madrid', '688990011',
+ 'Le encantan los conciertos en vivo.', 'https://img.com/vetusta.jpg', 2),
 
-('David Alonso', 'david@example.com', 'hash_contra_9', 'Calle Esperanza 34, Zaragoza', '699001122',
- 'Coleccionista de vinilos antiguos.', 'https://img.com/david.jpg', 3),
+('David Guetta', 'dguetta@example.com', 'hash_contra_9', 'Calle Esperanza 34, Zaragoza', '699001122',
+ 'Coleccionista de vinilos antiguos.', 'https://img.com/dguetta.jpg', 2),
 
 ('Elena Navarro', 'elena@example.com', 'hash_contra_10', 'Calle Verde 90, Málaga', '610112233',
  'Descubridora de nuevos talentos.', 'https://img.com/elena.jpg', 4);
-
--- listas de reproducción
-INSERT INTO lista (nombre, urlImagen, idUsuario) VALUES
-('Pop Favoritos', 'https://img.com/lista-pop.jpg', 1),
-('Rock Clásico', 'https://img.com/lista-rock.jpg', 2),
-('Indie Chill', 'https://img.com/lista-indie.jpg', 3),
-('Workout Mix', 'https://img.com/lista-gym.jpg', 1),
-('Lo mejor de 2024', 'https://img.com/lista-2024.jpg', 2),
-('Jazz Nights', 'https://img.com/lista-jazz.jpg', 6),
-('Roadtrip Vibes', 'https://img.com/lista-road.jpg', 7),
-('Acústicos Relax', 'https://img.com/lista-acoustic.jpg', 6),
-('Conciertos en Vivo', 'https://img.com/lista-live.jpg', 8),
-('Retro Collection', 'https://img.com/lista-retro.jpg', 9);
-
--- Canciones en listas de reproducción
-INSERT INTO lista_canciones (idLista, idCancion) VALUES
-(1, 1), (1, 2), (1, 10), (1, 12),
-(2, 5), (2, 6), (2, 7), (2, 9),
-(3, 15), (3, 16), (3, 17),
-(4, 11), (4, 13), (4, 14),
-(5, 18), (5, 19), (5, 20),
-(6, 3), (6, 15),
-(7, 5), (7, 7), (7, 9),
-(8, 1), (8, 3),
-(9, 4), (9, 6), (9, 8),
-(10, 10), (10, 11), (10, 12);
 
 -- Canciones favoritas
 INSERT INTO fav_cancion (idUsuario, idCancion) VALUES
@@ -85,11 +59,6 @@ INSERT INTO fav_album (idUsuario, idAlbum) VALUES
 (5, 5), (6, 3),
 (7, 4), (8, 5),
 (9, 2), (10, 1);
-
--- Álbumes deseados
-INSERT INTO deseo_album (idUsuario, idAlbum) VALUES
-(1, 5), (2, 1), (3, 2), (3, 3), (4, 4),
-(5, 1), (6, 5), (7, 2), (8, 4), (9, 3), (10, 5);
 
 -- Artistas favoritos
 INSERT INTO fav_artista (idUsuario, idArtista) VALUES

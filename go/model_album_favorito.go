@@ -10,6 +10,10 @@
 package openapi
 
 type AlbumFavorito struct {
-
 	IdAlbum int32 `json:"idAlbum"`
+}
+
+type GetAlbumFavorito struct {
+	IdAlbum int32  `json:"id"`
+	Nombre  string `json:"nombre"`
 }

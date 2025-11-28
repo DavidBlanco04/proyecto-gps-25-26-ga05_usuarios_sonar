@@ -11,6 +11,8 @@ package openapi
 
 import (
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -31,29 +33,31 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosAlbumsGet(c *gin.Context) {
 		return
 	}
 
-	rows, err := api.DB.Query(`
-		SELECT idAlbum 
-		FROM fav_album 
-		WHERE idUsuario = $1
-	`, idUsuario)
+	rows, err := api.DB.Query(`SELECT idAlbum FROM fav_album WHERE idUsuario = $1`, idUsuario)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener albumes favoritos"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener álbumes favoritos"})
 		return
 	}
 	defer rows.Close()
 
-	var favoritos []AlbumFavorito
+	var favoritos []GetAlbumFavorito
 
 	for rows.Next() {
-		var f AlbumFavorito
-		if err := rows.Scan(&f.IdAlbum); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error leyendo datos"})
-			return
+		var idAlbum int32
+		if err := rows.Scan(&idAlbum); err != nil {
+			fmt.Printf("Error scan idAlbum: %v\n", err)
+			continue
 		}
-		favoritos = append(favoritos, f)
+
+		album, err := api.fetchAlbum(idAlbum)
+		if err != nil {
+			fmt.Printf("fetchAlbum error: %v\n", err)
+			continue
+		}
+		favoritos = append(favoritos, *album)
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"status":    "OK",
 		"favoritos": favoritos,
 	})
@@ -131,27 +135,28 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosArtistasGet(c *gin.Context) {
 	}
 
 	rows, err := api.DB.Query(`
-		SELECT idArtista
-		FROM fav_artista
-		WHERE idUsuario = $1
-	`, idUsuario)
+        SELECT u.id, u.nombre
+        FROM fav_artista f
+        JOIN usuario u ON f.idArtista = u.id
+        WHERE f.idUsuario = $1
+    `, idUsuario)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener artistas favoritos"})
 		return
 	}
 	defer rows.Close()
 
-	var favoritos []ArtistaFavorito
+	var favoritos []GetArtistaFavorito
 
 	for rows.Next() {
-		var a ArtistaFavorito
-		if err := rows.Scan(&a.IdArtista); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error leyendo datos"})
-			return
+		var a GetArtistaFavorito
+		if err := rows.Scan(&a.IdArtista, &a.Nombre); err != nil {
+			continue
 		}
 		favoritos = append(favoritos, a)
 	}
-	c.JSON(200, gin.H{
+
+	c.JSON(http.StatusOK, gin.H{
 		"status":    "OK",
 		"favoritos": favoritos,
 	})
@@ -228,29 +233,29 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesGet(c *gin.Context) 
 		return
 	}
 
-	rows, err := api.DB.Query(`
-		SELECT idCancion
-		FROM fav_cancion
-		WHERE idUsuario = $1
-	`, idUsuario)
+	rows, err := api.DB.Query(`SELECT idCancion FROM fav_cancion WHERE idUsuario = $1`, idUsuario)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener canciones favoritas"})
 		return
 	}
 	defer rows.Close()
 
-	var favoritos []CancionFavorita
+	var favoritos []GetCancionFavorita
 
 	for rows.Next() {
-		var cCancion CancionFavorita
-		if err := rows.Scan(&cCancion.IdCancion); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error leyendo datos"})
-			return
+		var idCancion int32
+		if err := rows.Scan(&idCancion); err != nil {
+			continue
 		}
-		favoritos = append(favoritos, cCancion)
+
+		cancion, err := api.fetchCancion(idCancion)
+		if err != nil {
+			continue
+		}
+		favoritos = append(favoritos, *cancion)
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"status":    "OK",
 		"favoritos": favoritos,
 	})
@@ -315,4 +320,54 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesIdCancionPost(c *gin
 	}
 
 	c.JSON(200, gin.H{"status": "OK"})
+}
+
+func (api *FavoritosAPI) fetchCancion(idCancion int32) (*GetCancionFavorita, error) {
+	resp, err := http.Get(fmt.Sprintf("http://contenido-app:8080/canciones/%d", idCancion))
+	if err != nil || resp.StatusCode != 200 {
+		return nil, fmt.Errorf("error consultando canción")
+	}
+	defer resp.Body.Close()
+
+	var data struct {
+		Id     int32  `json:"id"`
+		Nombre string `json:"nombre"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+
+	return &GetCancionFavorita{
+		IdCancion: data.Id,
+		Nombre:    data.Nombre,
+	}, nil
+}
+
+func (api *FavoritosAPI) fetchAlbum(idAlbum int32) (*GetAlbumFavorito, error) {
+	url := fmt.Sprintf("http://contenido-app:8080/albums/%d", idAlbum)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("error HTTP: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP status %d", resp.StatusCode)
+	}
+
+	var album GetAlbumFavorito
+	if err := json.NewDecoder(resp.Body).Decode(&album); err != nil {
+		return nil, fmt.Errorf("error decodificando JSON: %v", err)
+	}
+
+	// log para debug
+	fmt.Printf("fetchAlbum id=%d => %+v\n", idAlbum, album)
+
+	// validar que realmente se obtuvo un nombre
+	if album.Nombre == "" {
+		return nil, fmt.Errorf("album con id %d no tiene nombre o no existe", idAlbum)
+	}
+
+	return &album, nil
 }

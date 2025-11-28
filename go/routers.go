@@ -11,22 +11,23 @@ package openapi
 
 import (
 	"net/http"
+	"time"
 	"usuarios/middleware"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 // Route is the information for every URI.
 type Route struct {
 	// Name is the name of this Route.
-	Name		string
+	Name string
 	// Method is the string for the HTTP method. ex) GET, POST etc..
-	Method		string
+	Method string
 	// Pattern is the pattern of the URI.
-	Pattern	 	string
+	Pattern string
 	// HandlerFunc is the handler function of this route.
-	HandlerFunc	gin.HandlerFunc
+	HandlerFunc gin.HandlerFunc
 }
 
 // NewRouter returns a new router.
@@ -39,19 +40,19 @@ func NewRouterWithGinEngine(router *gin.Engine, handleFunctions ApiHandleFunctio
 	// Agregar el middleware CORS globalmente
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"}, // Permite solo el frontend local en el puerto 5173
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-	
+
 	// El middleware decide si aplicar autenticación basándose en el endpoint
 	router.Use(func(c *gin.Context) {
 		// Rutas públicas
-		rutasPublicas := map[string]bool {
-			"POST /usuarios": true,
-			"GET /usuarios": true,
+		rutasPublicas := map[string]bool{
+			"POST /usuarios":           true,
+			"GET /usuarios":            true,
 			"GET /artistas/:idArtista": true,
 			"GET /usuarios/:idUsuario": true,
 		}
@@ -97,14 +98,10 @@ func DefaultHandleFunc(c *gin.Context) {
 
 type ApiHandleFunctions struct {
 
-	// Routes for the AlbumesDeseadosAPI part of the API
-	AlbumesDeseadosAPI AlbumesDeseadosAPI
 	// Routes for the ComprasAPI part of the API
 	ComprasAPI ComprasAPI
 	// Routes for the FavoritosAPI part of the API
 	FavoritosAPI FavoritosAPI
-	// Routes for the ListasDeReproduccionAPI part of the API
-	ListasDeReproduccionAPI ListasDeReproduccionAPI
 	// Routes for the PostsDeComunidadAPI part of the API
 	PostsDeComunidadAPI PostsDeComunidadAPI
 	// Routes for the UsuariosAPI part of the API
@@ -120,24 +117,6 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			http.MethodGet,
 			"/artistas/:idArtista",
 			handleFunctions.ArtistasAPI.ArtistasIdArtistaGet,
-		},
-		{
-			"UsuariosIdUsuarioDeseosAlbumsGet",
-			http.MethodGet,
-			"/usuarios/:idUsuario/deseos/albums",
-			handleFunctions.AlbumesDeseadosAPI.UsuariosIdUsuarioDeseosAlbumsGet,
-		},
-		{
-			"UsuariosIdUsuarioDeseosAlbumsIdAlbumDelete",
-			http.MethodDelete,
-			"/usuarios/:idUsuario/deseos/albums/:idAlbum",
-			handleFunctions.AlbumesDeseadosAPI.UsuariosIdUsuarioDeseosAlbumsIdAlbumDelete,
-		},
-		{
-			"UsuariosIdUsuarioDeseosAlbumsIdAlbumPost",
-			http.MethodPost,
-			"/usuarios/:idUsuario/deseos/albums/:idAlbum",
-			handleFunctions.AlbumesDeseadosAPI.UsuariosIdUsuarioDeseosAlbumsIdAlbumPost,
 		},
 		{
 			"UsuariosIdUsuarioComprasGet",
@@ -204,48 +183,6 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			http.MethodPost,
 			"/usuarios/:idUsuario/favoritos/canciones/:idCancion",
 			handleFunctions.FavoritosAPI.UsuariosIdUsuarioFavoritosCancionesIdCancionPost,
-		},
-		{
-			"ListasIdListaCancionesIdCancionDelete",
-			http.MethodDelete,
-			"/listas/:idLista/canciones/:idCancion",
-			handleFunctions.ListasDeReproduccionAPI.ListasIdListaCancionesIdCancionDelete,
-		},
-		{
-			"ListasIdListaCancionesIdCancionPost",
-			http.MethodPost,
-			"/listas/:idLista/canciones/:idCancion",
-			handleFunctions.ListasDeReproduccionAPI.ListasIdListaCancionesIdCancionPost,
-		},
-		{
-			"ListasIdListaDelete",
-			http.MethodDelete,
-			"/listas/:idLista",
-			handleFunctions.ListasDeReproduccionAPI.ListasIdListaDelete,
-		},
-		{
-			"ListasIdListaGet",
-			http.MethodGet,
-			"/listas/:idLista",
-			handleFunctions.ListasDeReproduccionAPI.ListasIdListaGet,
-		},
-		{
-			"ListasIdListaPatch",
-			http.MethodPatch,
-			"/listas/:idLista",
-			handleFunctions.ListasDeReproduccionAPI.ListasIdListaPatch,
-		},
-		{
-			"UsuariosIdUsuarioListasGet",
-			http.MethodGet,
-			"/usuarios/:idUsuario/listas",
-			handleFunctions.ListasDeReproduccionAPI.UsuariosIdUsuarioListasGet,
-		},
-		{
-			"UsuariosIdUsuarioListasPost",
-			http.MethodPost,
-			"/usuarios/:idUsuario/listas",
-			handleFunctions.ListasDeReproduccionAPI.UsuariosIdUsuarioListasPost,
 		},
 		{
 			"ComunidadesIdComunidadPostsGet",
