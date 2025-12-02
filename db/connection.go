@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// Import en blanco: registra el driver de PostgreSQL (github.com/lib/pq)
-	// en el paquete `database/sql` mediante su función init().
-	// Es necesario para que `sql.Open("postgres", ...)` encuentre el driver.
 	_ "github.com/lib/pq"
 )
 
