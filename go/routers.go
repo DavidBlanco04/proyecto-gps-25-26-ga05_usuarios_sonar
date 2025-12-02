@@ -30,6 +30,12 @@ type Route struct {
 	HandlerFunc gin.HandlerFunc
 }
 
+const (
+	routeUsuarios     = "/usuarios"
+	routeUsuarioId    = "/usuarios/:idUsuario"
+	routeArtistaId    = "/artistas/:idArtista"
+)
+
 // NewRouter returns a new router.
 func NewRouter(handleFunctions ApiHandleFunctions) *gin.Engine {
 	return NewRouterWithGinEngine(gin.Default(), handleFunctions)
@@ -51,10 +57,10 @@ func NewRouterWithGinEngine(router *gin.Engine, handleFunctions ApiHandleFunctio
 	router.Use(func(c *gin.Context) {
 		// Rutas públicas
 		rutasPublicas := map[string]bool{
-			"POST /usuarios":           true,
-			"GET /usuarios":            true,
-			"GET /artistas/:idArtista": true,
-			"GET /usuarios/:idUsuario": true,
+			http.MethodPost + " " + routeUsuarios:  true,
+			http.MethodGet + " " + routeUsuarios:   true,
+			http.MethodGet + " " + routeArtistaId:  true,
+			http.MethodGet + " " + routeUsuarioId:  true,
 		}
 
 		// Se formatea la clave de la ruta actual
@@ -115,7 +121,7 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 		{
 			"ArtistasIdArtistaGet",
 			http.MethodGet,
-			"/artistas/:idArtista",
+			routeArtistaId,
 			handleFunctions.ArtistasAPI.ArtistasIdArtistaGet,
 		},
 		{
@@ -223,31 +229,31 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 		{
 			"UsuariosGet",
 			http.MethodGet,
-			"/usuarios",
+			routeUsuarios,
 			handleFunctions.UsuariosAPI.UsuariosGet,
 		},
 		{
 			"UsuariosIdUsuarioDelete",
 			http.MethodDelete,
-			"/usuarios/:idUsuario",
+			routeUsuarioId,
 			handleFunctions.UsuariosAPI.UsuariosIdUsuarioDelete,
 		},
 		{
 			"UsuariosIdUsuarioGet",
 			http.MethodGet,
-			"/usuarios/:idUsuario",
+			routeUsuarioId,
 			handleFunctions.UsuariosAPI.UsuariosIdUsuarioGet,
 		},
 		{
 			"UsuariosIdUsuarioPatch",
 			http.MethodPatch,
-			"/usuarios/:idUsuario",
+			routeUsuarioId,
 			handleFunctions.UsuariosAPI.UsuariosIdUsuarioPatch,
 		},
 		{
 			"UsuariosPost",
 			http.MethodPost,
-			"/usuarios",
+			routeUsuarios,
 			handleFunctions.UsuariosAPI.UsuariosPost,
 		},
 	}
