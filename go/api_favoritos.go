@@ -172,9 +172,10 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosArtistasGet(c *gin.Context) {
 
 	var favoritos []GetArtistaFavorito
 
-	for rows.Next() {
+		for rows.Next() {
 		var a GetArtistaFavorito
 		if err := rows.Scan(&a.IdArtista, &a.Nombre); err != nil {
+			fmt.Printf("Error scan artista: %v\n", err)
 			continue
 		}
 		favoritos = append(favoritos, a)
@@ -270,9 +271,10 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesGet(c *gin.Context) 
 
 	var favoritos []GetCancionFavorita
 
-	for rows.Next() {
+		for rows.Next() {
 		var idCancion int32
 		if err := rows.Scan(&idCancion); err != nil {
+			fmt.Printf("Error scan idCancion: %v\n", err)
 			continue
 		}
 
