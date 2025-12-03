@@ -115,7 +115,11 @@ func (api *PostsDeComunidadAPI) PostsIdPostDelete(c *gin.Context) {
 		return
 	}
 
-	rowsAffected, _ := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Error al comprobar filas afectadas: " + err.Error()})
+		return
+	}
 	if rowsAffected == 0 {
 		c.JSON(404, gin.H{"error": "Post no encontrado"})
 		return
