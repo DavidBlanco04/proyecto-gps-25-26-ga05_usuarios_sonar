@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	// Importación en blanco para registrar el driver de PostgreSQL en database/sql.
+	// El driver se registra en su función init() y database/sql utiliza ese
+	// registro al abrir una conexión con el nombre de driver "postgres".
 	_ "github.com/lib/pq"
 )
 
