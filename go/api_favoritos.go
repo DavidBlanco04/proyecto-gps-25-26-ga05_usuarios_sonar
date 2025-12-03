@@ -107,8 +107,12 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosAlbumsIdAlbumDelete(c *gin.Co
 		return
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": msgErrDeleteAlbum})
+		return
+	}
+	if rowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": msgAlbumNotInFavorites})
 		return
 	}
@@ -206,8 +210,12 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosArtistasIdArtistaDelete(c *gi
 		return
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": msgErrDeleteArtista})
+		return
+	}
+	if rowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": msgArtistaNotInFavorites})
 		return
 	}
@@ -305,8 +313,12 @@ func (api *FavoritosAPI) UsuariosIdUsuarioFavoritosCancionesIdCancionDelete(c *g
 		return
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": msgErrDeleteCancion})
+		return
+	}
+	if rowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": msgCancionNotInFavorites})
 		return
 	}

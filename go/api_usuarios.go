@@ -115,7 +115,11 @@ func (api *UsuariosAPI) UsuariosIdUsuarioDelete(c *gin.Context) {
 		return
 	}
 
-	rowsAffected, _ := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Error al comprobar filas afectadas: " + err.Error()})
+		return
+	}
 	if rowsAffected == 0 {
 		c.JSON(404, gin.H{"error": "Usuario no encontrado"})
 		return
@@ -326,16 +330,39 @@ func (api *UsuariosAPI) UsuariosPost(c *gin.Context) {
 }
 
 func (api *UsuariosAPI) registrarUsuario(c *gin.Context, datos map[string]any) {
-	// Se extraen los datos
-    nombre, _ := datos["nombre"].(string)
-    correo, _ := datos["correo"].(string)
-    contrasena, _ := datos["contrasena"].(string)
-    direccion, _ := datos["direccion"].(string)
-    telefono, _ := datos["telefono"].(string)
-    descripcion, _ := datos["descripcion"].(string)
-    urlImagen, _ := datos["urlImagen"].(string)
-	tipoFloat, _ := datos["tipo"].(float64)
-	tipo := int(tipoFloat)
+	// Se extraen los datos (validando el tipo de cada campo)
+	nombre := ""
+	if v, ok := datos["nombre"].(string); ok {
+		nombre = v
+	}
+	correo := ""
+	if v, ok := datos["correo"].(string); ok {
+		correo = v
+	}
+	contrasena := ""
+	if v, ok := datos["contrasena"].(string); ok {
+		contrasena = v
+	}
+	direccion := ""
+	if v, ok := datos["direccion"].(string); ok {
+		direccion = v
+	}
+	telefono := ""
+	if v, ok := datos["telefono"].(string); ok {
+		telefono = v
+	}
+	descripcion := ""
+	if v, ok := datos["descripcion"].(string); ok {
+		descripcion = v
+	}
+	urlImagen := ""
+	if v, ok := datos["urlImagen"].(string); ok {
+		urlImagen = v
+	}
+	tipo := 0
+	if tf, ok := datos["tipo"].(float64); ok {
+		tipo = int(tf)
+	}
     
     // Validar campos requeridos
     if nombre == "" || correo == "" || contrasena == "" {
@@ -410,16 +437,39 @@ func (api *UsuariosAPI) loginUsuario(c *gin.Context, datos map[string]any) {
 	var idUsuario int
 	var contrasenaHasheada string
 
-	// Se extraen los datos
-    nombre, _ := datos["nombre"].(string)
-    correo, _ := datos["correo"].(string)
-    contrasena, _ := datos["contrasena"].(string)
-    direccion, _ := datos["direccion"].(string)
-    telefono, _ := datos["telefono"].(string)
-    descripcion, _ := datos["descripcion"].(string)
-    urlImagen, _ := datos["urlImagen"].(string)
-	tipoFloat, _ := datos["tipo"].(float64)
-	tipo := int(tipoFloat)
+	// Se extraen los datos (validando el tipo de cada campo)
+	nombre := ""
+	if v, ok := datos["nombre"].(string); ok {
+		nombre = v
+	}
+	correo := ""
+	if v, ok := datos["correo"].(string); ok {
+		correo = v
+	}
+	contrasena := ""
+	if v, ok := datos["contrasena"].(string); ok {
+		contrasena = v
+	}
+	direccion := ""
+	if v, ok := datos["direccion"].(string); ok {
+		direccion = v
+	}
+	telefono := ""
+	if v, ok := datos["telefono"].(string); ok {
+		telefono = v
+	}
+	descripcion := ""
+	if v, ok := datos["descripcion"].(string); ok {
+		descripcion = v
+	}
+	urlImagen := ""
+	if v, ok := datos["urlImagen"].(string); ok {
+		urlImagen = v
+	}
+	tipo := 0
+	if tf, ok := datos["tipo"].(float64); ok {
+		tipo = int(tf)
+	}
 
 	err := api.DB.QueryRow(
 		"SELECT id, nombre, correo, contrasena, direccion, telefono, descripcion, urlImagen, tipo FROM usuario WHERE correo = $1",

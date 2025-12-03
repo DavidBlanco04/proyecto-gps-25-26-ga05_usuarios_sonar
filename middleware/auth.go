@@ -15,11 +15,11 @@ func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		strToken := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 
-		token, _ := jwt.Parse(strToken, func(token *jwt.Token) (any, error) {
+		token, err := jwt.Parse(strToken, func(token *jwt.Token) (any, error) {
 			return JwtKey, nil
 		})
 
-		if token == nil || !token.Valid {
+		if err != nil || token == nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
 			c.Abort()
 			return
@@ -32,10 +32,13 @@ func Auth() gin.HandlerFunc {
 
 func GetIdUsuario(c *gin.Context) int {
 	strToken := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-	token, _ := jwt.Parse(strToken, func(token *jwt.Token) (any, error) {
+	token, err := jwt.Parse(strToken, func(token *jwt.Token) (any, error) {
 		return JwtKey, nil
 	})
-	
+	if err != nil || token == nil {
+		return 0
+	}
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		if idUsuario, ok := claims["user_id"].(float64); ok {
 			return int(idUsuario)
