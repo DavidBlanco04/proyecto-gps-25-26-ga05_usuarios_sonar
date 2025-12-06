@@ -24,6 +24,16 @@ type UsuariosAPI struct {
 	DB *sql.DB
 }
 
+const (
+	msgInvalidIdUsuario       = "ID de usuario inválido"
+	msgUsuarioNotFound        = "Usuario no encontrado"
+	msgErrVerifyUserPrefix    = "Error al verificar usuario: "
+	msgErrHashPassword        = "Error al hashear la contraseña"
+	msgErrGenerateToken       = "Error al generar el token"
+	msgInvalidCredentials     = "Credenciales inválidas"
+	msgDatosInvalidosPrefix   = "Datos inválidos"
+)
+
 var JwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 type Claims struct {
@@ -91,7 +101,7 @@ func (api *UsuariosAPI) UsuariosIdUsuarioDelete(c *gin.Context) {
 	idUsuarioStr := c.Param("idUsuario")
 	idUsuario, err := strconv.Atoi(idUsuarioStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "ID de usuario inválido"})
+		c.JSON(400, gin.H{"error": msgInvalidIdUsuario})
 		return
 	}
 
@@ -99,12 +109,12 @@ func (api *UsuariosAPI) UsuariosIdUsuarioDelete(c *gin.Context) {
 	var exists bool
 	err = api.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM usuario WHERE id = $1)", idUsuario).Scan(&exists)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Error al verificar usuario: " + err.Error()})
+		c.JSON(500, gin.H{"error": msgErrVerifyUserPrefix + err.Error()})
 		return
 	}
 
 	if !exists {
-		c.JSON(404, gin.H{"error": "Usuario no encontrado"})
+		c.JSON(404, gin.H{"error": msgUsuarioNotFound})
 		return
 	}
 
@@ -121,7 +131,7 @@ func (api *UsuariosAPI) UsuariosIdUsuarioDelete(c *gin.Context) {
 		return
 	}
 	if rowsAffected == 0 {
-		c.JSON(404, gin.H{"error": "Usuario no encontrado"})
+		c.JSON(404, gin.H{"error": msgUsuarioNotFound})
 		return
 	}
 
@@ -135,7 +145,7 @@ func (api *UsuariosAPI) UsuariosIdUsuarioGet(c *gin.Context) {
 	idUsuarioStr := c.Param("idUsuario")
 	idUsuario, err := strconv.Atoi(idUsuarioStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "ID de usuario inválido"})
+		c.JSON(400, gin.H{"error": msgInvalidIdUsuario})
 		return
 	}
 
@@ -158,7 +168,7 @@ func (api *UsuariosAPI) UsuariosIdUsuarioGet(c *gin.Context) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(404, gin.H{"error": "Usuario no encontrado"})
+			c.JSON(404, gin.H{"error": msgUsuarioNotFound})
 		} else {
 			c.JSON(500, gin.H{"error": "Error al obtener usuario: " + err.Error()})
 		}
@@ -174,23 +184,23 @@ func (api *UsuariosAPI) UsuariosIdUsuarioPatch(c *gin.Context) {
     // Obtener ID del usuario desde la URL
     idUsuarioStr := c.Param("idUsuario")
     idUsuario, err := strconv.Atoi(idUsuarioStr)
-    if err != nil {
-        c.JSON(400, gin.H{"error": "ID de usuario inválido"})
-        return
-    }
+	if err != nil {
+		c.JSON(400, gin.H{"error": msgInvalidIdUsuario})
+		return
+	}
 
     // Verificar si el usuario existe
     var exists bool
     err = api.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM usuario WHERE id = $1)", idUsuario).Scan(&exists)
-    if err != nil {
-        c.JSON(500, gin.H{"error": "Error al verificar usuario: " + err.Error()})
-        return
-    }
+	if err != nil {
+		c.JSON(500, gin.H{"error": msgErrVerifyUserPrefix + err.Error()})
+		return
+	}
 
-    if !exists {
-        c.JSON(404, gin.H{"error": "Usuario no encontrado"})
-        return
-    }
+	if !exists {
+		c.JSON(404, gin.H{"error": msgUsuarioNotFound})
+		return
+	}
 
     // Bind de los datos de actualización
     var updateData UsuarioUpdate
@@ -222,11 +232,11 @@ func (api *UsuariosAPI) UsuariosIdUsuarioPatch(c *gin.Context) {
     
     if updateData.Contrasena != "" {
         // Hashear la nueva contraseña
-        contrasenaHasheada, err := bcrypt.GenerateFromPassword([]byte(updateData.Contrasena), bcrypt.DefaultCost)
-        if err != nil {
-            c.JSON(400, gin.H{"error": "Error al hashear la contraseña"})
-            return
-        }
+		contrasenaHasheada, err := bcrypt.GenerateFromPassword([]byte(updateData.Contrasena), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(400, gin.H{"error": msgErrHashPassword})
+			return
+		}
         query += "contrasena = $" + strconv.Itoa(paramCount) + ", "
         params = append(params, string(contrasenaHasheada))
         paramCount++
@@ -313,7 +323,7 @@ func (api *UsuariosAPI) UsuariosPost(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&datos)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Datos inválidos " + err.Error()})
+		c.JSON(400, gin.H{"error": msgDatosInvalidosPrefix + " " + err.Error()})
 		return
 	}
 
@@ -387,7 +397,7 @@ func (api *UsuariosAPI) registrarUsuario(c *gin.Context, datos map[string]any) {
 	// Se saca el hash de la contraseña
 	contrasenaHasheada, err := bcrypt.GenerateFromPassword([]byte(contrasena), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Error al hashear la contraseña"})
+		c.JSON(400, gin.H{"error": msgErrHashPassword})
 		return
 	}
 
@@ -415,7 +425,7 @@ func (api *UsuariosAPI) registrarUsuario(c *gin.Context, datos map[string]any) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(JwtKey)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Error al generar el token"})
+		c.JSON(400, gin.H{"error": msgErrGenerateToken})
 		return
 	}
 
@@ -478,7 +488,7 @@ func (api *UsuariosAPI) loginUsuario(c *gin.Context, datos map[string]any) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(401, gin.H{"error": "Credenciales inválidas"})
+			c.JSON(401, gin.H{"error": msgInvalidCredentials})
 		} else {
 			c.JSON(500, gin.H{"error": "Error interno del servidor"})
 		}
@@ -488,7 +498,7 @@ func (api *UsuariosAPI) loginUsuario(c *gin.Context, datos map[string]any) {
 	// Verificar contraseña
 	err = bcrypt.CompareHashAndPassword([]byte(contrasenaHasheada), []byte(contrasena))
 	if err != nil {
-		c.JSON(401, gin.H{"error": "Credenciales inválidas"})
+		c.JSON(401, gin.H{"error": msgInvalidCredentials})
 		return
 	}
 
@@ -504,7 +514,7 @@ func (api *UsuariosAPI) loginUsuario(c *gin.Context, datos map[string]any) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	strToken, err := token.SignedString(JwtKey)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Error al generar el token"})
+		c.JSON(500, gin.H{"error": msgErrGenerateToken})
 		return
 	}
 
